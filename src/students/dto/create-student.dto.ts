@@ -8,6 +8,11 @@ export class CreateStudentDto {
   @IsEmail()
   email: string;
 
+  // ! Temporarily compulsory
+  @IsString()
+  @Length(6, 20)
+  password: string;
+
   @IsString()
   @Length(6, 6)
   matricNumber: string;
