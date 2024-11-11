@@ -1,16 +1,14 @@
 import {
   Body,
   Controller,
-  Get,
   Post,
   UseGuards,
   Request,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/LoginDto';
 import { AuthGuard } from '@nestjs/passport';
 import { Student } from 'src/students/schemas/students.schema';
-import { JwtAuthGuard } from './gaurds/jwt/jwt.guard';
 import { JwtRefreshAuthGuard } from './gaurds/refresh-jwt/refresh-jwt.guard';
 
 @Controller('auth')
@@ -24,7 +22,7 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
 
   // * responsible for creating access-token for future logins
-  loginLocal(@Request() req: { user: Student }) {
+  signIn(@Request() req: { user: Student }) {
     // todo: perform other operations after login
     console.log('user on login', req.user);
     const signInInfo = this.authService.signIn(req.user);
@@ -32,12 +30,22 @@ export class AuthController {
     return signInInfo;
   }
 
-  @Post('refresh')
+  @Get('refresh')
   // @UseGuards(AuthGuard('local'))
+  @UseGuards(JwtRefreshAuthGuard)
   refreshToken(@Request() req: { user: Student }) {
     // this will contain the access-token
+    console.log('user on refresh', req.user);
     const newSignInInfo = this.authService.refreshToken(req.user);
-
     return newSignInInfo;
+  }
+
+  @Post('logout') // This is the correct HTTP method
+  @UseGuards(JwtRefreshAuthGuard)
+  signOut(@Request() req: { user: Student }) {
+    // this will contain the refresh-token
+    console.log('user on logout', req.user);
+    const signOutInfo = this.authService.signOut(req.user);
+    return signOutInfo;
   }
 }

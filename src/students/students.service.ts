@@ -6,6 +6,17 @@ import mongoose, { isValidObjectId, Model } from 'mongoose';
 import { Student } from './schemas/students.schema';
 import * as bcrypt from 'bcryptjs';
 import { SALT } from 'src/config/config';
+const fieldsAllowed = [
+  'id',
+  'firstName',
+  'lastName',
+  'email',
+  'matricNumber',
+  'department',
+  'faculty',
+  'courses',
+  // 'refreshToken',
+];
 // import mongoose from 'mongoose';
 @Injectable()
 export class StudentsService {
@@ -37,13 +48,29 @@ export class StudentsService {
     const student = await this.studentModel.findOne({ email });
     return student;
   }
-  async findOne(id: string) {
-    const student = await this.studentModel.findById(id);
+  async findOne(id: string, filter = false) {
+    // ? filter result if it's to be returned directly to client
+    const student = filter
+      ? await this.studentModel.findOne({
+          where: { id },
+          select: fieldsAllowed,
+        })
+      : await this.studentModel.findById(id);
+
     if (!student) throw new HttpException('Student not found', 404);
     return student.populate('materials');
   }
-
+  async updateRefreshToken(id: string, refreshToken: string) {
+    const updatedStudent = await this.studentModel.findByIdAndUpdate(
+      id,
+      { refreshToken },
+      { new: true },
+    );
+    if (!updatedStudent) throw new HttpException('Student not found', 404);
+    return updatedStudent;
+  }
   async update(id: string, updateStudentDto: UpdateStudentDto) {
+    // async update(id: string, updateStudentDto: Student) {
     let updatedStudent;
     try {
       updatedStudent = await this.studentModel.findByIdAndUpdate(

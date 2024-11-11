@@ -32,6 +32,9 @@ export class Student extends Document {
 
   @Prop({ unique: false, required: false })
   courses: string[];
+
+  @Prop({ type: String })
+  refreshToken?: string;
 }
 // create actual schema for class
 export const StudentSchema = SchemaFactory.createForClass(Student);

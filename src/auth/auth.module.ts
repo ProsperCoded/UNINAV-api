@@ -6,6 +6,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JWT_SECRET_KEY, JWT_REFRESH_SECRET_KEY } from 'src/config/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    RefreshJwtStrategy,
 
     // because of the two access tokens (jwt and refresh token)
     // we'll need to provide the jwt strategy twice

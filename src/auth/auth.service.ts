@@ -25,23 +25,43 @@ export class AuthService {
     }
   }
   async signIn(user: Student) {
-    console.log('user', user);
-    const payload: AuthPayload = { id: user._id.toString() };
-    console.log('payload before encoding', payload);
-    const access_token = this.jwtService.sign(payload);
+    const userId = user._id.toString();
+    const [access_token, refresh_token] = await this.generateToken(userId);
 
-    // -------------------------------------------------------
-    console.log('token after encoding', access_token);
-    const refresh_token = this.jwtRefreshService.sign(payload);
-
+    await this.studentsService.updateRefreshToken(userId, refresh_token);
     return { access_token, refresh_token };
   }
+  async signOut(user: Student) {
+    const userId = user._id.toString();
+    await this.studentsService.updateRefreshToken(userId, '');
+    return { message: 'Sign out successful' };
+  }
 
-  refreshToken(user: Student) {
-    const payload: AuthPayload = { id: user._id.toString() };
-    const token = this.jwtService.sign(payload);
+  async refreshToken(user: Student) {
+    const userId = user._id.toString();
+    // const userId = user.id;
+    const payload: AuthPayload = { id: userId };
+    const refresh_token = this.jwtService.sign(payload);
+    await this.studentsService.updateRefreshToken(userId, refresh_token);
     return {
-      access_token: token,
+      refresh_token,
     };
+  }
+  // generate access-token and refresh-token
+  async generateToken(id: string) {
+    const payload = { id };
+    const [access_token, refresh_token] = await Promise.all([
+      this.jwtService.sign(payload),
+      this.jwtRefreshService.sign(payload),
+    ]);
+    return [access_token, refresh_token];
+  }
+  async validateRefreshToken(userId: string, refreshToken: string) {
+    console.log('here in validateRefreshToken');
+    const student = await this.studentsService.findOne(userId);
+    if (student.refreshToken.toString() !== refreshToken) {
+      throw new ForbiddenException('Invalid Refresh Token');
+    }
+    return student;
   }
 }
