@@ -16,7 +16,7 @@ import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import mongoose from 'mongoose';
-import { JwtAuthGuard } from 'src/auth/gaurds/jwt/guards';
+import { JwtAuthGuard } from 'src/auth/gaurds/jwt/jwt.guard';
 
 @Controller('students')
 export class StudentsController {

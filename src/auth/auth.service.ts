@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { StudentsService } from 'src/students/students.service';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/LoginDto';
@@ -10,7 +10,11 @@ import { AuthPayload } from 'src/types/jwt';
 export class AuthService {
   constructor(
     private studentsService: StudentsService,
-    private jwtService: JwtService,
+    // would have used this if we needed a single access token
+    // private jwtService: JwtService,
+    @Inject('JWT_ACCESS_TOKEN_SERVICE') private jwtService: JwtService,
+    @Inject('JWT_REFRESH_TOKEN_SERVICE')
+    private jwtRefreshService: JwtService,
   ) {}
   async validateUser({ email, password }: LoginDto): Promise<any> {
     const student = await this.studentsService.findByEmail(email);
@@ -19,16 +23,25 @@ export class AuthService {
       const { password, ...result } = student.toJSON();
       return result;
     }
-    throw new ForbiddenException('Invalid credentials');
   }
   async signIn(user: Student) {
     console.log('user', user);
     const payload: AuthPayload = { id: user._id.toString() };
     console.log('payload before encoding', payload);
     const access_token = this.jwtService.sign(payload);
+
+    // -------------------------------------------------------
     console.log('token after encoding', access_token);
+    const refresh_token = this.jwtRefreshService.sign(payload);
+
+    return { access_token, refresh_token };
+  }
+
+  refreshToken(user: Student) {
+    const payload: AuthPayload = { id: user._id.toString() };
+    const token = this.jwtService.sign(payload);
     return {
-      access_token,
+      access_token: token,
     };
   }
 }
