@@ -7,6 +7,8 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JWT_SECRET_KEY, JWT_REFRESH_SECRET_KEY } from 'src/config/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
+import { JwtAuthGuard } from './gaurds/jwt/jwt.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -44,6 +46,9 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
           signOptions: { expiresIn: '2w' },
         }),
     },
+
+    // Enable authentication globally
+    { provide: APP_GUARD, useClass: JwtAuthGuard }, // * this can be done more than once if you have multiple guards
   ],
 })
 export class AuthModule {}

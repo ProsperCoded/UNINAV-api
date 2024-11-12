@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Student } from 'src/students/schemas/students.schema';
 import { JwtRefreshAuthGuard } from './gaurds/refresh-jwt/refresh-jwt.guard';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
 
   // * responsible for creating access-token for future logins
+  @Public()
   signIn(@Request() req: { user: Student }) {
     // todo: perform other operations after login
     console.log('user on login', req.user);

@@ -17,6 +17,7 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import mongoose from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt/jwt.guard';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('students')
 export class StudentsController {
@@ -29,6 +30,7 @@ export class StudentsController {
   }
 
   @Get()
+  @Public()
   findAll() {
     return this.studentsService.findAll();
   }
