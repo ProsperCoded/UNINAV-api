@@ -1,11 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { isValidObjectId, Model } from 'mongoose';
 import { Student } from './schemas/students.schema';
 import * as bcrypt from 'bcryptjs';
-import { SALT } from 'src/config/config';
+import { ConfigType } from '@nestjs/config';
+import mainConfig from 'src/config/main.config';
 const fieldsAllowed = [
   'id',
   'firstName',
@@ -22,11 +23,16 @@ const fieldsAllowed = [
 export class StudentsService {
   constructor(
     @InjectModel(Student.name) private studentModel: Model<Student>,
+    @Inject(mainConfig.KEY)
+    private mainConfigService: ConfigType<typeof mainConfig>,
   ) {}
   async create(createStudentDto: CreateStudentDto) {
     let savedStudent;
     try {
-      const hashedPassword = await bcrypt.hash(createStudentDto.password, SALT);
+      const hashedPassword = await bcrypt.hash(
+        createStudentDto.password,
+        this.mainConfigService.SALT,
+      );
       const newStudent = new this.studentModel({
         ...createStudentDto,
         password: hashedPassword,

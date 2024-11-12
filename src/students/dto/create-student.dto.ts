@@ -15,22 +15,25 @@ export class CreateStudentDto {
 
   @IsString()
   @Length(6, 6)
-  matricNumber: string;
+  @IsOptional()
+  matricNumber?: string;
 
   // secondary information the user can add later
   @IsString()
   @IsOptional()
-  department: string;
+  department?: string;
 
   @IsString()
   @IsOptional()
-  level: string;
+  level?: string;
 
   @IsString()
   @IsOptional()
-  faculty: string;
+  faculty?: string;
 
   @IsString({ each: true })
   @IsOptional()
-  courses: string[];
+  courses?: string[];
+
+  avaterUrl?: string;
 }

@@ -5,11 +5,14 @@ import {
   UseGuards,
   Request,
   Get,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Student } from 'src/students/schemas/students.schema';
 import { JwtRefreshAuthGuard } from './gaurds/refresh-jwt/refresh-jwt.guard';
+import { GoogleAuthGuard } from './gaurds/google-auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -47,5 +50,26 @@ export class AuthController {
     console.log('user on logout', req.user);
     const signOutInfo = this.authService.signOut(req.user);
     return signOutInfo;
+  }
+  @Get('google/login')
+  @UseGuards(GoogleAuthGuard)
+  async googleLogin(@Req() req) {
+    console.log('google/login request.user =>', req.user);
+    // initiates the google login process
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleCallback(@Req() req, @Res() res) {
+    // you should create your own refresh toke,
+    // the one created by google isn't what is signIned in you application
+    const signInInfo = await this.authService.signIn(req.user);
+
+    // redirect user with new access token
+    const url = new URL('http://localhost:3000');
+    url.searchParams.append('access_token', signInInfo.access_token);
+    url.searchParams.append('refresh_token', signInInfo.refresh_token);
+    console.log('redirected user to ', url.toString());
+    res.redirect(url.toString());
   }
 }

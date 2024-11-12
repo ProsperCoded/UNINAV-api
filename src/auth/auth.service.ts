@@ -5,6 +5,7 @@ import { LoginDto } from './dto/LoginDto';
 import { JwtService } from '@nestjs/jwt';
 import { Student } from 'src/students/schemas/students.schema';
 import { AuthPayload } from 'src/types/jwt';
+import { CreateStudentDto } from 'src/students/dto/create-student.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,9 @@ export class AuthService {
   ) {}
   async validateUser({ email, password }: LoginDto): Promise<any> {
     const student = await this.studentsService.findByEmail(email);
+    if (!student) {
+      throw new ForbiddenException("User doesn't exists ");
+    }
     const isValidPassword = await bcrypt.compare(password, student.password);
     if (student.email == student.email.toLowerCase() && isValidPassword) {
       const { password, ...result } = student.toJSON();
@@ -25,6 +29,7 @@ export class AuthService {
     }
   }
   async signIn(user: Student) {
+    console.log('user to signIn', user);
     const userId = user._id.toString();
     const [access_token, refresh_token] = await this.generateToken(userId);
 
@@ -63,5 +68,13 @@ export class AuthService {
       throw new ForbiddenException('Invalid Refresh Token');
     }
     return student;
+  }
+  async validateGoogleOAuthLogin(googleUser: CreateStudentDto) {
+    const student = await this.studentsService.findByEmail(googleUser.email);
+    if (student) {
+      console.log('user exists', student);
+      return student;
+    }
+    return await this.studentsService.create(googleUser);
   }
 }

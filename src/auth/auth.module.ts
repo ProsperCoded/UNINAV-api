@@ -4,23 +4,18 @@ import { AuthController } from './auth.controller';
 import { StudentsModule } from 'src/students/students.module';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { JWT_SECRET_KEY, JWT_REFRESH_SECRET_KEY } from 'src/config/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
-
+import { GoogleStrategy } from './strategies/google.strategy';
+import jwtConfig from 'src/config/jwt.config';
+import refreshJwtConfig from 'src/config/refresh-jwt.config';
 @Module({
   imports: [
     StudentsModule,
 
     //* configuring jwt options
-    JwtModule.register({
-      secret: JWT_SECRET_KEY,
-      signOptions: { expiresIn: '1d' },
-    }),
-    JwtModule.register({
-      secret: JWT_REFRESH_SECRET_KEY,
-      signOptions: { expiresIn: '2w' },
-    }),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
+    JwtModule.registerAsync(refreshJwtConfig.asProvider()),
   ],
   controllers: [AuthController],
   providers: [
@@ -28,7 +23,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
     LocalStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
-
+    GoogleStrategy,
     // because of the two access tokens (jwt and refresh token)
     // we'll need to provide the jwt strategy twice
 
@@ -38,11 +33,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
     },
     {
       provide: 'JWT_REFRESH_TOKEN_SERVICE',
-      useFactory: (jwtModule: JwtModule) =>
-        new JwtService({
-          secret: JWT_REFRESH_SECRET_KEY,
-          signOptions: { expiresIn: '2w' },
-        }),
+      useFactory: () => new JwtService(refreshJwtConfig()),
     },
   ],
 })
