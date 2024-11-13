@@ -1,0 +1,12 @@
+frontend:
+    path: .
+    publish: dist/main
+    scripts:
+        build:
+            - nest run build
+        deploy:
+            - npm install -g @nestjs/cli
+    subdomain: uni-nav
+name: uni-nav
+region: us-east-1
+yamlVersion: 2
