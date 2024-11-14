@@ -6,6 +6,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Student } from 'src/students/schemas/students.schema';
 import { AuthPayload } from 'src/types/jwt';
 import { CreateStudentDto } from 'src/students/dto/create-student.dto';
+import mainConfig from 'src/config/main.config';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +15,8 @@ export class AuthService {
     private studentsService: StudentsService,
     // would have used this if we needed a single access token
     // private jwtService: JwtService,
+    @Inject(mainConfig.KEY)
+    private mainConfigService: ConfigType<typeof mainConfig>,
     @Inject('JWT_ACCESS_TOKEN_SERVICE') private jwtService: JwtService,
     @Inject('JWT_REFRESH_TOKEN_SERVICE')
     private jwtRefreshService: JwtService,
@@ -22,13 +26,20 @@ export class AuthService {
     if (!student) {
       throw new ForbiddenException("User doesn't exists ");
     }
-    const isValidPassword = await bcrypt.compare(password, student.password);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      +this.mainConfigService.SALT,
+    );
+    const isValidPassword = await bcrypt.compare(
+      hashedPassword,
+      student.password,
+    );
     if (student.email == student.email.toLowerCase() && isValidPassword) {
       const { password, ...result } = student.toJSON();
       return result;
     }
   }
-  async signIn(user: Student) {
+  async login(user: Student) {
     console.log('user to signIn', user);
     const userId = user._id.toString();
     const [access_token, refresh_token] = await this.generateToken(userId);
@@ -72,7 +83,7 @@ export class AuthService {
   async validateGoogleOAuthLogin(googleUser: CreateStudentDto) {
     const student = await this.studentsService.findByEmail(googleUser.email);
     if (student) {
-      console.log('user exists', student);
+      console.log(student.firstName, 'already exists');
       return student;
     }
     return await this.studentsService.create(googleUser);

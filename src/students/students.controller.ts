@@ -11,34 +11,25 @@ import {
   HttpException,
   UseGuards,
   Request,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import mongoose from 'mongoose';
-import { JwtAuthGuard } from 'src/auth/gaurds/jwt/jwt.guard';
-
+import { JwtAuthGuard } from 'src/gaurds/jwt/jwt.guard';
+import { DeleteStudentDto } from './dto/delete-student.dto';
+import { Req } from '@nestjs/common';
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
-
-  @Post()
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  create(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentsService.create(createStudentDto);
-  }
 
   @Get()
   findAll() {
     return this.studentsService.findAll();
   }
-  // todo return additional personal information about the user
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req: { user: { id: string } }) {
-    console.log('user id', req.user.id);
-    return this.studentsService.findOne(req.user.id);
-  }
+
   // * return regular information about specific user
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -46,7 +37,22 @@ export class StudentsController {
     if (!mongoose.isValidObjectId(id)) {
       throw new HttpException('Invalid Student ID', 400);
     }
-    return this.studentsService.findOne(id);
+    return this.studentsService.findOne(id, true);
+  }
+
+  // todo return additional personal information about the user
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req: { user: { id: string } }) {
+    console.log('user id', req.user.id);
+    return this.studentsService.findOne(req.user.id);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  create(@Body() createStudentDto: CreateStudentDto) {
+    return this.studentsService.create(createStudentDto);
   }
 
   @Patch(':id')
@@ -54,13 +60,19 @@ export class StudentsController {
   update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     // verify that this is a valid objectid
     if (!mongoose.isValidObjectId(id)) {
-      throw new HttpException('Invalid Student ID', 400);
+      throw new HttpException('Invalid Student ID2', 400);
     }
     return this.studentsService.update(id, updateStudentDto);
   }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.studentsService.remove(+id);
+  // delete a student account
+  @Delete()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Req() req, @Body() deleteStudentDto: DeleteStudentDto) {
+    console.log('deleteStudentDto', deleteStudentDto);
+    return this.studentsService.remove({
+      id: req.user.id,
+      ...deleteStudentDto,
+    });
   }
 }

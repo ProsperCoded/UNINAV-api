@@ -11,8 +11,8 @@ import {
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Student } from 'src/students/schemas/students.schema';
-import { JwtRefreshAuthGuard } from './gaurds/refresh-jwt/refresh-jwt.guard';
-import { GoogleAuthGuard } from './gaurds/google-auth/google-auth.guard';
+import { JwtRefreshAuthGuard } from '../gaurds/refresh-jwt/refresh-jwt.guard';
+import { GoogleAuthGuard } from '../gaurds/google-auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,10 +25,10 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
 
   // * responsible for creating access-token for future logins
-  signIn(@Request() req: { user: Student }) {
+  login(@Request() req: { user: Student }) {
     // todo: perform other operations after login
     console.log('user on login', req.user);
-    const signInInfo = this.authService.signIn(req.user);
+    const signInInfo = this.authService.login(req.user);
     // const refresh_token = this.
     return signInInfo;
   }
@@ -63,7 +63,7 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res) {
     // you should create your own refresh toke,
     // the one created by google isn't what is signIned in you application
-    const signInInfo = await this.authService.signIn(req.user);
+    const signInInfo = await this.authService.login(req.user);
 
     // redirect user with new access token
     const url = new URL('http://localhost:3000');

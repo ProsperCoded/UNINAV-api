@@ -7,14 +7,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Mongoose } from 'mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import database from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import googleOauthConfig from './config/google-oauth.config';
 import config from './config/main.config';
-
-const Database = 'uninav';
-const mongoDBUrl = `mongodb+srv://prospercoded:1a2b3c...@restapi.bmamfwo.mongodb.net/${Database}?retryWrites=true&w=majority&appName=RestAPI`;
 
 @Module({
   imports: [
@@ -27,6 +26,9 @@ const mongoDBUrl = `mongodb+srv://prospercoded:1a2b3c...@restapi.bmamfwo.mongodb
       cache: true,
       expandVariables: true,
       load: [database, config, jwtConfig, refreshJwtConfig, googleOauthConfig],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
     }),
   ],
   controllers: [AppController],

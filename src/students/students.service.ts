@@ -7,6 +7,7 @@ import { Student } from './schemas/students.schema';
 import * as bcrypt from 'bcryptjs';
 import { ConfigType } from '@nestjs/config';
 import mainConfig from 'src/config/main.config';
+import { DeleteStudentDto } from './dto/delete-student.dto';
 const fieldsAllowed = [
   'id',
   'firstName',
@@ -31,7 +32,7 @@ export class StudentsService {
     try {
       const hashedPassword = await bcrypt.hash(
         createStudentDto.password,
-        this.mainConfigService.SALT,
+        +this.mainConfigService.SALT,
       );
       const newStudent = new this.studentModel({
         ...createStudentDto,
@@ -93,7 +94,23 @@ export class StudentsService {
     return updatedStudent;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} student`;
+  async remove(studentDto: DeleteStudentDto) {
+    let { id: userId } = studentDto;
+    const user = await this.studentModel.findOne({
+      id: userId,
+      email: studentDto.email,
+    });
+    if (!user) throw new HttpException('Student not found', 404);
+
+    const isMatch = await bcrypt.compare(studentDto.password, user.password);
+    if (!isMatch)
+      throw new HttpException('Invalid Password', HttpStatus.UNAUTHORIZED);
+    await user.deleteOne();
+    if (studentDto.deleteMaterials) {
+      user.materials.forEach(async (material) => {
+        await material.deleteOne();
+      });
+    }
+    return { message: 'Deleted Account Successfully' };
   }
 }

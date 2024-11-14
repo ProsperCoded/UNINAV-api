@@ -23,6 +23,8 @@ export class Student extends Document {
   @Prop({ type: [mongoose.Types.ObjectId], default: [], ref: 'Material' })
   materials: Material[];
 
+  // @Prop({}) collection of materials
+
   // optional data
   @Prop({ unique: false, required: false })
   department: string;
