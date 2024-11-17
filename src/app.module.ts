@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { UniversityEntitiesModule } from './university-entities/university-entities.module';
 import database from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import refreshJwtConfig from './config/refresh-jwt.config';
@@ -30,6 +31,7 @@ import config from './config/main.config';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
+    UniversityEntitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

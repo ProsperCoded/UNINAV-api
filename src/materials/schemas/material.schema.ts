@@ -24,6 +24,19 @@ export class Material extends Document {
 
   @Prop({ type: String })
   description: string;
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
+
+  @Prop({
+    type: {
+      // only applicable for GDrive type
+      files: [String],
+    },
+    default: null,
+    required: false,
+  })
+  metaData: { files: string[] };
 }
 // create actual schema for class
 export const MaterialSchema = SchemaFactory.createForClass(Material);

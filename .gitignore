@@ -59,4 +59,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # personal 
 prompts.md
-./src/greeting.md
+greeting.md

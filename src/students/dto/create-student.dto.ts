@@ -36,4 +36,6 @@ export class CreateStudentDto {
   courses?: string[];
 
   avaterUrl?: string;
+  googleRefreshToken?: string;
+  googleAccessToken?: string;
 }

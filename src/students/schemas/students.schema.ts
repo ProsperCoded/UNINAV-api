@@ -17,7 +17,7 @@ export class Student extends Document {
   @Prop({ type: String, required: false })
   password?: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: String, default: '' })
   matricNumber: string;
 
   @Prop({ type: [mongoose.Types.ObjectId], default: [], ref: 'Material' })
@@ -40,9 +40,15 @@ export class Student extends Document {
 
   @Prop({ type: String, required: false })
   avaterUrl?: string;
+
+  @Prop({ type: String, required: false })
+  googleRefreshToken?: string;
+
+  @Prop({ type: String, required: false })
+  googleAccessToken?: string;
 }
 // create actual schema for class
 export const StudentSchema = SchemaFactory.createForClass(Student);
 
 // add a unique sparse index on 'matricNumber'
-StudentSchema.index({ matricNumber: 1 }, { unique: true, sparse: true });
+StudentSchema.index({ email: 1 }, { unique: true, sparse: true });

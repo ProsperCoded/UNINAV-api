@@ -13,6 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Student } from 'src/students/schemas/students.schema';
 import { JwtRefreshAuthGuard } from '../gaurds/refresh-jwt/refresh-jwt.guard';
 import { GoogleAuthGuard } from '../gaurds/google-auth/google-auth.guard';
+import { FRONTEND_URL } from 'src/config/config';
 
 @Controller('auth')
 export class AuthController {
@@ -66,7 +67,7 @@ export class AuthController {
     const signInInfo = await this.authService.login(req.user);
 
     // redirect user with new access token
-    const url = new URL('http://localhost:3000');
+    const url = new URL(FRONTEND_URL);
     url.searchParams.append('access_token', signInInfo.access_token);
     url.searchParams.append('refresh_token', signInInfo.refresh_token);
     console.log('redirected user to ', url.toString());
