@@ -42,7 +42,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       password: '',
       // googleDriveAccessToken: accessToken, // Add this line to store the access token for Google Drive
     };
-    console.log({ refreshToken, accessToken }, { profile });
+    console.log({ refreshToken, accessToken });
+    console.log({ name, emails, photos });
     // done(null, user);
     // or just return the user
 

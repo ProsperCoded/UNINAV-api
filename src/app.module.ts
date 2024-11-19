@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { UniversityEntitiesModule } from './university-entities/university-entities.module';
+import { CollectionsModule } from './collections/collections.module';
 import database from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import refreshJwtConfig from './config/refresh-jwt.config';
@@ -32,6 +33,7 @@ import config from './config/main.config';
       rootPath: join(__dirname, '..', 'public'),
     }),
     UniversityEntitiesModule,
+    CollectionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

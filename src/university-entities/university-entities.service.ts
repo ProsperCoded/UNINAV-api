@@ -14,14 +14,17 @@ import {
 import { Course } from './schema/course.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateDepartmentDto } from './dto/update-university-entities.dto';
-import { Document } from 'mongoose';
-import { DefaultFaculties } from 'src/config/config';
+import {
+  COURSE_MODEL_NAME,
+  DefaultFaculties,
+  FACULTY_MODEL_NAME,
+} from 'src/config/config';
 
 @Injectable()
 export class UniversityEntitiesService {
   constructor(
-    @InjectModel(Faculty.name) private facultyModel: Model<Faculty>,
-    @InjectModel(Course.name) private courseModel: Model<Course>,
+    @InjectModel(FACULTY_MODEL_NAME) private facultyModel: Model<Faculty>,
+    @InjectModel(COURSE_MODEL_NAME) private courseModel: Model<Course>,
   ) {}
   async createFaculty(createFacultyDto: CreateFacultyDto) {
     try {

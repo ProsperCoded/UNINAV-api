@@ -2,12 +2,13 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { isValidObjectId, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { Student } from './schemas/students.schema';
 import * as bcrypt from 'bcryptjs';
 import { ConfigType } from '@nestjs/config';
 import mainConfig from 'src/config/main.config';
 import { DeleteStudentDto } from './dto/delete-student.dto';
+import { STUDENT_MODEL_NAME } from 'src/config/config';
 const fieldsAllowed = [
   'id',
   'firstName',
@@ -23,7 +24,7 @@ const fieldsAllowed = [
 @Injectable()
 export class StudentsService {
   constructor(
-    @InjectModel(Student.name) private studentModel: Model<Student>,
+    @InjectModel(STUDENT_MODEL_NAME) private studentModel: Model<Student>,
     @Inject(mainConfig.KEY)
     private mainConfigService: ConfigType<typeof mainConfig>,
   ) {}
@@ -93,13 +94,30 @@ export class StudentsService {
     }
     return updatedStudent;
   }
-
+  // async addMaterial(id: string, materialId: string) {
+  //   const updatedStudent = await this.studentModel.findByIdAndUpdate(
+  //     id,
+  //     {
+  //       $push: {
+  //         materials: new mongoose.Types.ObjectId(materialId),
+  //       },
+  //     },
+  //     { new: true },
+  //   );
+  //   if (!updatedStudent)
+  //     throw new HttpException('Student not found', HttpStatus.NOT_FOUND);
+  //   return updatedStudent;
+  // }
   async remove(studentDto: DeleteStudentDto) {
     let { id: userId } = studentDto;
-    const user = await this.studentModel.findOne({
-      id: userId,
-      email: studentDto.email,
-    });
+    const user = await this.studentModel
+      .findOne({
+        id: userId,
+        email: studentDto.email,
+      })
+      .populate({
+        path: 'materials',
+      });
     if (!user) throw new HttpException('Student not found', 404);
 
     const isMatch = await bcrypt.compare(studentDto.password, user.password);

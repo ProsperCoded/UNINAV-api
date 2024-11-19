@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, ObjectId } from 'mongoose';
 import { Material } from 'src/materials/schemas/material.schema';
+import { Collection } from 'src/collections/collections.schema';
+
 @Schema()
 export class Student extends Document {
   _id: ObjectId;
@@ -17,12 +19,20 @@ export class Student extends Document {
   @Prop({ type: String, required: false })
   password?: string;
 
-  @Prop({ required: false, type: String, default: '' })
+  @Prop({ required: false, type: String })
   matricNumber: string;
 
-  @Prop({ type: [mongoose.Types.ObjectId], default: [], ref: 'Material' })
+  @Prop({
+    type: [{ type: mongoose.Types.ObjectId, ref: Material.name }],
+    default: [],
+  })
+  // materials: Material[];
   materials: Material[];
-
+  @Prop({
+    type: [{ type: mongoose.Types.ObjectId, ref: Collection.name }],
+    default: [],
+  })
+  collections: Collection[];
   // @Prop({}) collection of materials
 
   // optional data

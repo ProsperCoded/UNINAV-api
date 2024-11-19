@@ -96,3 +96,9 @@ export const DefaultFaculties = [
     departments: [],
   },
 ];
+
+export const STUDENT_MODEL_NAME = 'Student';
+export const COLLECTION_MODEL_NAME = 'Collection';
+export const MATERIAL_MODEL_NAME = 'Material';
+export const COURSE_MODEL_NAME = 'Course';
+export const FACULTY_MODEL_NAME = 'Faculty';

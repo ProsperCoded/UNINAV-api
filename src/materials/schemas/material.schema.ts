@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { acceptableMaterialTypes, AcceptableMaterialTypes } from '../types';
 import { Student } from 'src/students/schemas/students.schema';
+import { STUDENT_MODEL_NAME } from 'src/config/config';
+export const MATERIAL_MODEL_NAME = 'Material';
 @Schema()
 export class Material extends Document {
   @Prop({ type: String, enum: acceptableMaterialTypes, required: true })
@@ -16,7 +18,11 @@ export class Material extends Document {
   @Prop({ type: Number, default: 0 })
   downloadCount: number;
 
-  @Prop({ type: mongoose.Types.ObjectId, required: true, ref: 'Student' })
+  @Prop({
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: STUDENT_MODEL_NAME,
+  })
   owner: Student;
 
   @Prop({ type: String })

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Course } from './course.schema';
+import { COURSE_MODEL_NAME } from 'src/config/config';
 
 @Schema()
 export class Faculty {
@@ -18,7 +18,7 @@ export class Faculty {
         courses: [
           {
             type: mongoose.Schema.ObjectId,
-            ref: Course.name,
+            ref: COURSE_MODEL_NAME,
           },
         ],
       },

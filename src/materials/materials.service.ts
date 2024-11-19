@@ -1,21 +1,33 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Material } from './schemas/material.schema';
+import { Material, MATERIAL_MODEL_NAME } from './schemas/material.schema';
 import { Model } from 'mongoose';
-import { Student, StudentSchema } from 'src/students/schemas/students.schema';
+import {
+  Student,
+} from 'src/students/schemas/students.schema';
 import googleOauthConfig from 'src/config/google-oauth.config';
 import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
+import { StudentsService } from 'src/students/students.service';
+import { STUDENT_MODEL_NAME } from 'src/config/config';
 
 @Injectable()
 export class MaterialsService {
   constructor(
-    @InjectModel(Material.name) private materialModel: Model<Material>,
-    @InjectModel(Student.name) private studentModel: Model<Student>,
+    @InjectModel(MATERIAL_MODEL_NAME) private materialModel: Model<Material>,
+    @InjectModel(STUDENT_MODEL_NAME) private studentModel: Model<Student>,
+
     @Inject(googleOauthConfig.KEY)
     private googleOauthConfigurations: ConfigType<typeof googleOauthConfig>,
+    private studentsService: StudentsService,
   ) {}
   async create(createMaterialDto: CreateMaterialDto) {
     let savedDocument;
@@ -55,8 +67,12 @@ export class MaterialsService {
     return this.materialModel.find();
   }
 
-  findOne(id: number) {
-    return this.materialModel.findById(id);
+  async findOne(id: string) {
+    const material = await this.materialModel.findById(id);
+    if (!material) {
+      throw new NotFoundException('Material with id Was not found ');
+    }
+    return material;
   }
 
   update(id: number, updateMaterialDto: UpdateMaterialDto) {
