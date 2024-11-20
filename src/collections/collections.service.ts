@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -22,17 +26,18 @@ export class CollectionsService {
     private readonly studentService: StudentsService,
     private readonly materialsService: MaterialsService,
   ) {}
-  async create(createCollectionDto: CreateCollectionDto) {
-    const collection = new this.collectionsModel(createCollectionDto);
+  async create(owner: string, createCollectionDto: CreateCollectionDto) {
+    const collection = new this.collectionsModel({
+      ...createCollectionDto,
+      owner,
+    });
     // verify collection.materials exists
     await Promise.all(
       createCollectionDto.materials.map(async (materialId) => {
         await this.materialsService.findOne(materialId);
       }),
     );
-    const student = await this.studentService.findOne(
-      createCollectionDto.owner,
-    );
+    const student = await this.studentService.findOne(owner);
     student.collections.push(collection._id as any);
     await collection.save();
     await student.save();
@@ -54,19 +59,28 @@ export class CollectionsService {
       .populate({ path: 'materials', model: MATERIAL_MODEL_NAME });
   }
 
-  async update(id: string, updateCollectionDto: UpdateCollectionDto) {
+  async update(
+    id: string,
+    owner: string,
+    updateCollectionDto: UpdateCollectionDto,
+  ) {
     if (!isValidObjectId(id)) {
       throw new ForbiddenException('Invalid collection id');
     }
     // todo verify if collection.owner is same as studentId
-
+    const collection = await this.collectionsModel.findById(id);
+    if (collection.owner.toString() !== owner) {
+      throw new UnauthorizedException(
+        "You aren't authorized to update this collection",
+      );
+    }
     // * verify if materials exists
     if (updateCollectionDto.materials) {
       updateCollectionDto.materials.forEach(async (materialId) => {
         await this.materialsService.findOne(materialId);
       });
     }
-    const collection = await this.collectionsModel
+    const updatedCollection = await this.collectionsModel
       .findByIdAndUpdate(
         id,
 
@@ -76,10 +90,23 @@ export class CollectionsService {
         },
       )
       .populate({ path: 'materials', model: MATERIAL_MODEL_NAME });
-    return collection;
+    return { collection: updatedCollection, message: 'Updated Successfully' };
   }
 
-  remove(id: string) {
-    return this.collectionsModel.findByIdAndDelete(id);
+  async remove(id: string, owner: string) {
+    if (!isValidObjectId(id)) {
+      throw new ForbiddenException('Invalid collection id');
+    }
+    const collection = await this.collectionsModel.findById(id);
+    if (!collection) {
+      throw new ForbiddenException('Collection not found');
+    }
+    if (collection.owner.toString() !== owner) {
+      throw new UnauthorizedException(
+        "You aren't authorized to delete this collection",
+      );
+    }
+    await collection.deleteOne();
+    return { message: 'Deleted Successfully' };
   }
 }

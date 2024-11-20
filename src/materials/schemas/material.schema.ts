@@ -16,7 +16,8 @@ export class Material extends Document {
   tags: string[];
 
   @Prop({ type: Number, default: 0 })
-  downloadCount: number;
+  clickCount: number;
+  theme;
 
   @Prop({
     type: mongoose.Types.ObjectId,

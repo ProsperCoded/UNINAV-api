@@ -15,3 +15,5 @@ export type AcceptableMaterialTypes =
   | 'image'
   | 'article'
   | 'other';
+
+export type RequestFromAuth = { user: { id: string } };

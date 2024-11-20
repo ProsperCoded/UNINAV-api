@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Inject,
@@ -9,10 +10,8 @@ import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Material, MATERIAL_MODEL_NAME } from './schemas/material.schema';
-import { Model } from 'mongoose';
-import {
-  Student,
-} from 'src/students/schemas/students.schema';
+import { isValidObjectId, Model } from 'mongoose';
+import { Student } from 'src/students/schemas/students.schema';
 import googleOauthConfig from 'src/config/google-oauth.config';
 import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
@@ -29,20 +28,22 @@ export class MaterialsService {
     private googleOauthConfigurations: ConfigType<typeof googleOauthConfig>,
     private studentsService: StudentsService,
   ) {}
-  async create(createMaterialDto: CreateMaterialDto) {
+  async create(owner: string, createMaterialDto: CreateMaterialDto) {
     let savedDocument;
     try {
-      const newDocument = new this.materialModel(createMaterialDto);
+      const newDocument = new this.materialModel({
+        ...createMaterialDto,
+        owner,
+      });
       console.log('creating new document', createMaterialDto);
-      const student = await this.studentModel.findById(
-        createMaterialDto.owner,
+      const student = await this.studentModel.findByIdAndUpdate(
+        owner,
         {
           $push: { materials: newDocument._id },
         },
         { new: true },
       );
-      if (!student)
-        throw new HttpException('Student not found', HttpStatus.NOT_FOUND);
+      if (!student) throw new NotFoundException('Student not found');
 
       if (createMaterialDto.type === 'GDrive') {
         const folderUrl = new URL(createMaterialDto.resourceAddress);
@@ -58,13 +59,13 @@ export class MaterialsService {
       console.log('Document Saved Successfully');
     } catch (error) {
       console.error('an error occurred in creating and saving document', error);
-      return error.message;
+      throw new BadRequestException(error.message);
     }
     return savedDocument;
   }
 
   findAll() {
-    return this.materialModel.find();
+    return this.materialModel.find().populate('owner');
   }
 
   async findOne(id: string) {
@@ -75,12 +76,45 @@ export class MaterialsService {
     return material;
   }
 
-  update(id: number, updateMaterialDto: UpdateMaterialDto) {
-    return `This action updates a #${id} material`;
+  async update(
+    id: string,
+    owner: string,
+    updateMaterialDto: UpdateMaterialDto,
+  ) {
+    const material = await this.materialModel.findById(id);
+    if (!material) {
+      throw new NotFoundException('Material with id Was not found ');
+    }
+    if (material.owner.toString() !== owner) {
+      throw new HttpException(
+        'You are not authorized to update this material',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    const updatedMaterial = await this.materialModel.findByIdAndUpdate(
+      id,
+      updateMaterialDto,
+      { new: true },
+    );
+    return updatedMaterial;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} material`;
+  async remove(id: string, owner: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid Material Id');
+    }
+    const material = await this.materialModel.findById(id);
+    if (!material) {
+      throw new NotFoundException('Material with id Was not found ');
+    }
+    if (material.owner.toString() !== owner) {
+      throw new HttpException(
+        'You are not authorized to delete this material',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    await material.deleteOne();
+    return { message: 'Deleted successfully' };
   }
   private async listPublicFolderFiles(apiKey: string, folderId: string) {
     const drive = google.drive({ version: 'v3', auth: apiKey });

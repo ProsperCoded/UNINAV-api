@@ -8,9 +8,6 @@ export class CreateCollectionDto {
   @Length(10, 500)
   description: string;
 
-  @IsMongoId()
-  owner: string;
-
   @IsMongoId({ each: true })
   @IsNotEmpty({ each: true })
   materials: string[];

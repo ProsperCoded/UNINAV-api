@@ -12,9 +12,6 @@ export class CreateMaterialDto {
   @IsString()
   resourceAddress: string;
 
-  @IsMongoId()
-  owner: string;
-
   @IsString()
   @IsIn(acceptableMaterialTypes)
   type: AcceptableMaterialTypes;

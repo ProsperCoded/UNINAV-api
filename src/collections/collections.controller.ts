@@ -6,18 +6,27 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CollectionsService } from './collections.service';
 import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
+import { JwtAuthGuard } from 'src/gaurds/jwt/jwt.guard';
+import { RequestFromAuth } from 'src/materials/types';
 
 @Controller('collections')
 export class CollectionsController {
   constructor(private readonly collectionsService: CollectionsService) {}
 
   @Post()
-  create(@Body() createCollectionDto: CreateCollectionDto) {
-    return this.collectionsService.create(createCollectionDto);
+  @UseGuards(JwtAuthGuard)
+  create(
+    @Req() req: RequestFromAuth,
+    @Body() createCollectionDto: CreateCollectionDto,
+  ) {
+    const owner = req.user.id;
+    return this.collectionsService.create(owner, createCollectionDto);
   }
 
   @Get()
@@ -31,15 +40,20 @@ export class CollectionsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id') id: string,
+    @Req() req: RequestFromAuth,
     @Body() updateCollectionDto: UpdateCollectionDto,
   ) {
-    return this.collectionsService.update(id, updateCollectionDto);
+    const owner = req.user.id;
+    return this.collectionsService.update(id, owner, updateCollectionDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.collectionsService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @Req() req: RequestFromAuth) {
+    const owner = req.user.id;
+    return this.collectionsService.remove(id, owner);
   }
 }

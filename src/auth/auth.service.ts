@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { StudentsService } from 'src/students/students.service';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/LoginDto';
@@ -24,20 +29,15 @@ export class AuthService {
   async validateUser({ email, password }: LoginDto): Promise<any> {
     const student = await this.studentsService.findByEmail(email);
     if (!student) {
-      throw new ForbiddenException("User doesn't exists ");
+      throw new UnauthorizedException('Invalid credentials');
     }
-    const hashedPassword = await bcrypt.hash(
-      password,
-      +this.mainConfigService.SALT,
-    );
-    const isValidPassword = await bcrypt.compare(
-      hashedPassword,
-      student.password,
-    );
+    // ? simply use bcrypt.compare because salt is embedded in the hashed password
+    const isValidPassword = await bcrypt.compare(password, student.password);
     if (student.email == student.email.toLowerCase() && isValidPassword) {
       const { password, ...result } = student.toJSON();
       return result;
     }
+    throw new UnauthorizedException('Invalid credentials');
   }
   async login(user: Student) {
     console.log('user to signIn', user);

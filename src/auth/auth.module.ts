@@ -36,5 +36,6 @@ import refreshJwtConfig from 'src/config/refresh-jwt.config';
       useFactory: () => new JwtService(refreshJwtConfig()),
     },
   ],
+  // exports: [JwtStrategy],
 })
 export class AuthModule {}

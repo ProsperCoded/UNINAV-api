@@ -5,7 +5,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import jwtConfig from 'src/config/jwt.config';
 
-// import { JWT_SECRET_KEY } from 'src/config/config';
 import { AuthPayload } from 'src/types/jwt';
 const jwtHeader = 'access-token';
 
