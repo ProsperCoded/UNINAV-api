@@ -17,6 +17,7 @@ import { ConfigType } from '@nestjs/config';
 import { google } from 'googleapis';
 import { StudentsService } from 'src/students/students.service';
 import { STUDENT_MODEL_NAME } from 'src/config/config';
+import { SearchPipeline } from './materials.aggregates';
 
 @Injectable()
 export class MaterialsService {
@@ -115,6 +116,12 @@ export class MaterialsService {
     }
     await material.deleteOne();
     return { message: 'Deleted successfully' };
+  }
+  async search(query: string) {
+    const aggregateResult = await this.materialModel.aggregate(
+      SearchPipeline(query),
+    );
+    return aggregateResult;
   }
   private async listPublicFolderFiles(apiKey: string, folderId: string) {
     const drive = google.drive({ version: 'v3', auth: apiKey });

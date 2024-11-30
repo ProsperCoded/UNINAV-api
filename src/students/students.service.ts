@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,6 +15,7 @@ import { ConfigType } from '@nestjs/config';
 import mainConfig from 'src/config/main.config';
 import { DeleteStudentDto } from './dto/delete-student.dto';
 import { STUDENT_MODEL_NAME } from 'src/config/config';
+import { UniversityEntitiesService } from 'src/university-entities/university-entities.service';
 const fieldsAllowed = [
   'id',
   'firstName',
@@ -25,6 +32,7 @@ const fieldsAllowed = [
 export class StudentsService {
   constructor(
     @InjectModel(STUDENT_MODEL_NAME) private studentModel: Model<Student>,
+    private universityEntitiesService: UniversityEntitiesService,
     @Inject(mainConfig.KEY)
     private mainConfigService: ConfigType<typeof mainConfig>,
   ) {}
@@ -35,6 +43,21 @@ export class StudentsService {
         createStudentDto.password,
         +this.mainConfigService.SALT,
       );
+      // verify faculty, courses, departments exists
+      if (createStudentDto.faculty) {
+        const faculty = await this.universityEntitiesService.findFaculty(
+          createStudentDto.faculty,
+        );
+        if (createStudentDto.department) {
+          const department = faculty.departments.find((d) => {
+            return d._id.toString() === createStudentDto.department;
+          });
+          if (!department) {
+            throw new NotFoundException("Department wasn't found");
+          }
+        }
+        // verify courses here
+      }
       const newStudent = new this.studentModel({
         ...createStudentDto,
         password: hashedPassword,

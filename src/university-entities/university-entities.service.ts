@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Faculty } from './schema/faculty.schema';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { isValidObjectId, Model } from 'mongoose';
 import {
   CreateDepartmentDto,
   CreateFacultyDto,
@@ -38,6 +38,16 @@ export class UniversityEntitiesService {
   }
   async getFaculties() {
     return await this.facultyModel.find();
+  }
+  async findFaculty(id: string) {
+    if (!isValidObjectId(id)) {
+      throw new ForbiddenException('Invalid faculty id');
+    }
+    const faculty = await this.facultyModel.findById(id);
+    if (!faculty) {
+      throw new NotFoundException("Faculty wasn't found");
+    }
+    return faculty;
   }
   async createDepartment(createDepartmentDto: CreateDepartmentDto) {
     const faculty = await this.facultyModel.findById(

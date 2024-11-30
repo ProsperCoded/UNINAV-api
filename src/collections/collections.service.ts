@@ -47,16 +47,17 @@ export class CollectionsService {
   async findAll() {
     return await this.collectionsModel
       .find()
-      .populate({ path: 'materials', model: MATERIAL_MODEL_NAME });
+      .populate({ path: 'owner', model: MATERIAL_MODEL_NAME });
   }
 
   findOne(id: string) {
     if (!isValidObjectId(id)) {
       throw new ForbiddenException('Invalid collection id');
     }
-    return this.collectionsModel
-      .findById(id)
-      .populate({ path: 'materials', model: MATERIAL_MODEL_NAME });
+    return this.collectionsModel.findById(id).populate([
+      { path: 'materials', model: MATERIAL_MODEL_NAME },
+      { path: 'owner', model: STUDENT_MODEL_NAME },
+    ]);
   }
 
   async update(

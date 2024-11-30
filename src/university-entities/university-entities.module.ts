@@ -3,7 +3,7 @@ import { UniversityEntitiesService } from './university-entities.service';
 import { UniversityEntitiesController } from './university-entities.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FacultySchema } from './schema/faculty.schema';
-import { Course, CourseSchema } from './schema/course.schema';
+import { CourseSchema } from './schema/course.schema';
 import { COURSE_MODEL_NAME, FACULTY_MODEL_NAME } from 'src/config/config';
 
 @Module({
@@ -15,5 +15,6 @@ import { COURSE_MODEL_NAME, FACULTY_MODEL_NAME } from 'src/config/config';
   ],
   controllers: [UniversityEntitiesController],
   providers: [UniversityEntitiesService],
+  exports: [UniversityEntitiesService],
 })
 export class UniversityEntitiesModule {}

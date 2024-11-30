@@ -1,4 +1,10 @@
-import { IsString, IsEmail, Length, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  Length,
+  IsOptional,
+  IsMongoId,
+} from 'class-validator';
 export class CreateStudentDto {
   @IsString()
   firstName: string;
@@ -19,7 +25,7 @@ export class CreateStudentDto {
   matricNumber?: string;
 
   // secondary information the user can add later
-  @IsString()
+  @IsMongoId()
   @IsOptional()
   department?: string;
 
@@ -27,11 +33,11 @@ export class CreateStudentDto {
   @IsOptional()
   level?: string;
 
-  @IsString()
+  @IsMongoId()
   @IsOptional()
   faculty?: string;
 
-  @IsString({ each: true })
+  @IsMongoId({ each: true })
   @IsOptional()
   courses?: string[];
 

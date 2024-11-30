@@ -2,6 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, ObjectId } from 'mongoose';
 import { Material } from 'src/materials/schemas/material.schema';
 import { Collection } from 'src/collections/collections.schema';
+import { Faculty } from 'src/university-entities/schema/faculty.schema';
+import { COURSE_MODEL_NAME, FACULTY_MODEL_NAME } from 'src/config/config';
+import { Course } from 'src/university-entities/schema/course.schema';
 
 @Schema()
 export class Student extends Document {
@@ -36,14 +39,23 @@ export class Student extends Document {
   // @Prop({}) collection of materials
 
   // optional data
-  @Prop({ unique: false, required: false })
-  department: string;
+  @Prop({ type: mongoose.Schema.ObjectId, unique: false, required: false })
+  department: mongoose.Types.ObjectId;
 
-  @Prop({ unique: false, required: false })
-  faculty: string;
+  @Prop({
+    type: mongoose.Schema.ObjectId,
+    unique: false,
+    required: false,
+    ref: FACULTY_MODEL_NAME,
+  })
+  faculty: Faculty;
 
-  @Prop({ unique: false, required: false })
-  courses: string[];
+  @Prop({
+    type: [mongoose.Schema.ObjectId],
+    required: false,
+    ref: COURSE_MODEL_NAME,
+  })
+  courses: Course[];
 
   @Prop({ type: String })
   refreshToken?: string;
