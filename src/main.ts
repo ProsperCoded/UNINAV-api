@@ -10,6 +10,13 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
+  // Enable CORS
+  app.enableCors({
+    origin: '*', // Allow requests from any origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include OPTIONS method
+    allowedHeaders: 'Content-Type,Authorization', // Allow specific headers
+    optionsSuccessStatus: 204, // Use HTTP 204 status for preflight success
+  });
 
   const port = configService.get('PORT') || 3000;
   await app.listen(port);

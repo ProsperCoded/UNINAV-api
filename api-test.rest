@@ -1,0 +1,10 @@
+@BASE_URL = http://localhost:3000
+
+# http://localhost:3000/university-entities/department
+
+
+GET {{BASE_URL}}/university-entities/department
+Content-Type: application/json
+User-Agent: Mozilla
+
+###

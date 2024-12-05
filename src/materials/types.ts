@@ -17,3 +17,4 @@ export type AcceptableMaterialTypes =
   | 'other';
 
 export type RequestFromAuth = { user: { id: string } };
+export type ResponseType = { message: string; data?: any; error?: any };

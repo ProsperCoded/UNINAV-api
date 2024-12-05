@@ -21,6 +21,10 @@ export class UniversityEntitiesController {
   getFaculties() {
     return this.universityEntitiesService.getFaculties();
   }
+  @Get('department')
+  getDepartments() {
+    return this.universityEntitiesService.getDepartments();
+  }
   @Post('department')
   createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
     return this.universityEntitiesService.createDepartment(createDepartmentDto);
@@ -28,10 +32,6 @@ export class UniversityEntitiesController {
   @Patch('department')
   updateDepartment(@Body() updateDepartmentDto: UpdateDepartmentDto) {
     return this.universityEntitiesService.updateDepartment(updateDepartmentDto);
-  }
-  @Get('department')
-  getDepartments() {
-    return this.universityEntitiesService.getDepartments();
   }
   @Post('course')
   createCourse(@Body() createFacultyDto: CreateCourseDto) {

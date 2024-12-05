@@ -14,6 +14,7 @@ import {
 import { Course } from './schema/course.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateDepartmentDto } from './dto/update-university-entities.dto';
+import { ResponseType } from 'src/materials/types';
 import {
   COURSE_MODEL_NAME,
   DefaultFaculties,
@@ -108,14 +109,19 @@ export class UniversityEntitiesService {
   }
   async getDepartments() {
     const allDepartments = [];
-    (
-      await this.facultyModel.find().populate({
-        path: 'departments.courses',
-        // model: Course.name,
-      })
-    ).forEach((faculty) => {
-      allDepartments.push(...faculty.departments);
-    });
+    try {
+      (
+        await this.facultyModel.find().populate({
+          path: 'departments.courses',
+          // model: Course.name,
+        })
+      ).forEach((faculty) => {
+        allDepartments.push(...faculty.departments);
+      });
+    } catch (error) {
+      console.error('! An error occurred in fetching departments');
+      return { message: 'Error in fetching departments', data: error };
+    }
     return allDepartments;
   }
   async createCourse(CreateCourseDto: CreateCourseDto) {

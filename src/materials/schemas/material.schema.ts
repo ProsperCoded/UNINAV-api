@@ -17,7 +17,6 @@ export class Material extends Document {
 
   @Prop({ type: Number, default: 0 })
   clickCount: number;
-  theme;
 
   @Prop({
     type: mongoose.Types.ObjectId,
