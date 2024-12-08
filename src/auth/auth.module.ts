@@ -9,6 +9,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import jwtConfig from 'src/config/jwt.config';
 import refreshJwtConfig from 'src/config/refresh-jwt.config';
+import { UniversityEntitiesModule } from 'src/university-entities/university-entities.module';
 @Module({
   imports: [
     StudentsModule,
@@ -16,6 +17,7 @@ import refreshJwtConfig from 'src/config/refresh-jwt.config';
     //* configuring jwt options
     JwtModule.registerAsync(jwtConfig.asProvider()),
     JwtModule.registerAsync(refreshJwtConfig.asProvider()),
+    UniversityEntitiesModule,
   ],
   controllers: [AuthController],
   providers: [

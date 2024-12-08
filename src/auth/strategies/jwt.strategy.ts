@@ -6,7 +6,7 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import jwtConfig from 'src/config/jwt.config';
 
 import { AuthPayload } from 'src/types/jwt';
-const jwtHeader = 'access-token';
+const jwtHeader = 'Authorization';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     // validation, decoding and verification of the token is done here
     super({
-      jwtFromRequest: ExtractJwt.fromHeader(jwtHeader),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtConfiguration.secret,
     });

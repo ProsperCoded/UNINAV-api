@@ -1,4 +1,5 @@
 @BASE_URL = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTU5NTNlMTkwZjI0MzAzNjg4YjNkMyIsImlhdCI6MTczMzY2MjA2NSwiZXhwIjoxNzMzNjY1NjY1fQ.4GCy7i6j3n1cpqLD6vH_rV1wKwG0VEmf65CGSlMDJn0
 
 # http://localhost:3000/university-entities/department
 
@@ -7,4 +8,29 @@ GET {{BASE_URL}}/university-entities/department
 Content-Type: application/json
 User-Agent: Mozilla
 
-###
+### CREATE USER
+POST {{BASE_URL}}/auth/signup
+Content-Type: application/json
+User-Agent: Mozilla
+
+{
+  "firstName":"prosper",
+  "lastName":"prosper",
+  "email":"prosper12@gmail.com",
+  "password":"prosper"
+}
+### LOGIN USER
+POST {{BASE_URL}}/auth/login
+Content-Type: application/json
+User-Agent: Mozilla
+
+{
+  "email":"prosper12@gmail.com",
+  "password":"prosper"
+}
+
+
+### GET PROFILE
+GET {{BASE_URL}}/student/profile
+Content-Type: application/json
+Authorization: Bearer {{token}}

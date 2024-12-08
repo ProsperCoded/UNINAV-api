@@ -14,7 +14,6 @@ import {
 import { Course } from './schema/course.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateDepartmentDto } from './dto/update-university-entities.dto';
-import { ResponseType } from 'src/materials/types';
 import {
   COURSE_MODEL_NAME,
   DefaultFaculties,
@@ -113,6 +112,7 @@ export class UniversityEntitiesService {
       (
         await this.facultyModel.find().populate({
           path: 'departments.courses',
+
           // model: Course.name,
         })
       ).forEach((faculty) => {

@@ -7,6 +7,8 @@ import {
   Get,
   Req,
   Res,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -14,6 +16,7 @@ import { Student } from 'src/students/schemas/students.schema';
 import { JwtRefreshAuthGuard } from '../gaurds/refresh-jwt/refresh-jwt.guard';
 import { GoogleAuthGuard } from '../gaurds/google-auth/google-auth.guard';
 import { FRONTEND_URL } from 'src/config/config';
+import { SignupDto } from './dto/Signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +36,11 @@ export class AuthController {
     // const refresh_token = this.
     return signInInfo;
   }
-
+  @Post('signup')
+  @HttpCode(HttpStatus.CREATED)
+  signup(@Body() signupDto: SignupDto) {
+    return this.authService.signup(signupDto);
+  }
   @Get('refresh')
   // @UseGuards(AuthGuard('local'))
   @UseGuards(JwtRefreshAuthGuard)

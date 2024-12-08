@@ -9,7 +9,7 @@ import { AuthService } from '../auth.service';
 import refreshJwtConfig from 'src/config/refresh-jwt.config';
 import { privateDecrypt } from 'crypto';
 import { ConfigType } from '@nestjs/config';
-const jwtHeader = 'refresh-token';
+const jwtHeader = 'refresh_token';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(

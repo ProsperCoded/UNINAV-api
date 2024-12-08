@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -36,41 +37,6 @@ export class StudentsService {
     @Inject(mainConfig.KEY)
     private mainConfigService: ConfigType<typeof mainConfig>,
   ) {}
-  async create(createStudentDto: CreateStudentDto) {
-    let savedStudent;
-    try {
-      const hashedPassword = await bcrypt.hash(
-        createStudentDto.password,
-        +this.mainConfigService.SALT,
-      );
-      // verify faculty, courses, departments exists
-      if (createStudentDto.faculty) {
-        const faculty = await this.universityEntitiesService.findFaculty(
-          createStudentDto.faculty,
-        );
-        if (createStudentDto.department) {
-          const department = faculty.departments.find((d) => {
-            return d._id.toString() === createStudentDto.department;
-          });
-          if (!department) {
-            throw new NotFoundException("Department wasn't found");
-          }
-        }
-        // verify courses here
-      }
-      const newStudent = new this.studentModel({
-        ...createStudentDto,
-        password: hashedPassword,
-      });
-      console.log('creating new user', createStudentDto);
-      savedStudent = await newStudent.save();
-      console.log('User Saved Successfully');
-    } catch (error) {
-      console.error('an error occurred in creating and saving student', error);
-      return error.message;
-    }
-    return savedStudent;
-  }
 
   findAll() {
     return this.studentModel.find();
@@ -81,15 +47,18 @@ export class StudentsService {
   }
   async findOne(id: string, filter = false) {
     // ? filter result if it's to be returned directly to client
-    const student = filter
-      ? await this.studentModel.findOne({
-          where: { id },
-          select: fieldsAllowed,
-        })
-      : await this.studentModel.findById(id);
+    try {
+      const student = filter
+        ? await this.studentModel.findById(id).select(fieldsAllowed)
+        : await this.studentModel.findById(id);
 
-    if (!student) throw new HttpException('Student not found', 404);
-    return student.populate('materials');
+      if (!student) throw new HttpException('Student not found', 404);
+      return student.populate('materials');
+    } catch (error) {
+      const message = 'an Server error occurred in finding student';
+      console.error(message, error);
+      throw new InternalServerErrorException(message);
+    }
   }
   async updateRefreshToken(id: string, refreshToken: string) {
     const updatedStudent = await this.studentModel.findByIdAndUpdate(
